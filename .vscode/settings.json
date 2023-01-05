@@ -1,0 +1,6 @@
+{
+	"rust-analyzer.files.excludeDirs": [
+		".wine_prefix"
+	],
+	"rust-analyzer.cargo.features": ["windows-native"]
+}

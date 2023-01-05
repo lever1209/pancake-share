@@ -1,0 +1,32 @@
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[package]
+
+name = "media-railway"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+
+clap = { version = "4.0.32", features = ["derive"] }
+smoltcp = "0.8.2"
+
+windows = { version = "0.43.0", optional = true }
+nwg = { package = "native-windows-gui", version = "1.0.13", optional = true }
+nwd = { package = "native-windows-derive", version = "1.0.5", optional = true }
+
+gtk = { package = "gtk4", version = "0.5.5", optional = true }
+
+[features]
+
+windows-native = ["windows-os", "dep:nwd", "dep:nwg"]
+
+windows-uwp = ["windows-os"]
+
+windows-os = ["dep:windows"]
+
+linux-os = []
+
+linux-gtk = ["linux-os", "dep:gtk"]
+
+linux-qt = ["linux-os"]

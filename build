@@ -1,0 +1,88 @@
+#!/bin/bash
+
+EXTRA_ARGS = "--release"
+
+function help_func() {
+	echo """
+Help:
+"""
+}
+function info_func() {
+	echo """
+Info:
+"""
+}
+function clean_func() {
+	echo Cleaning target/$'\n'
+	cargo clean
+}
+
+function build_windows() {
+	echo Building windows binaries in target/x86_64-pc-windows-gnu/media-railway.exe$'\n'
+	cargo build --target x86_64-pc-windows-gnu --features windows-native ${EXTRA_ARGS}
+}
+function build_linux() {
+	echo Building linux binaries in target/x86_64-pc-windows-gnu/media-railway$'\n'
+	cargo build --target x86_64-unknown-linux-gnu --features linux-gtk ${EXTRA_ARGS}
+}
+
+[[ -z $@ ]] && {
+	echo Use help subcommand for information about how to use this build tool.
+	echo Use info subcommand for general information about this build tool and this project.
+	echo Example: ./build help
+	echo Example: ./build info
+	exit
+}
+
+for arg in "$@"
+do
+	case "$arg" in
+	
+	windows)
+	build_windows
+	;;
+	
+	linux)
+	build_linux
+	;;
+	
+	clean)
+	clean_func
+	;;
+	
+	help)
+	help_func
+	;;
+	
+	-h)
+	help_func
+	;;
+	
+	--help)
+	help_func
+	;;
+	
+	info)
+	info_func
+	;;
+	
+	wine)
+	echo Running windows binary with wine
+	WINEPREFIX=$PWD/.wine_prefix wine ./target/x86_64-pc-windows-gnu/debug/media-railway.exe
+	;;
+	
+	copy)
+	echo Copying windows binary to windows testing dir
+	rm windows-dir/media-railway.exe
+	# windows-dir/ is a symlink to my windows partition for better testing
+	cp ./target/x86_64-pc-windows-gnu/debug/media-railway.exe windows-dir/
+	;;
+	
+	*)
+	echo Invalid input.
+	help_func
+	exit
+	;;
+	
+	esac
+done
