@@ -1,4 +1,7 @@
 #![windows_subsystem = "windows"]
+#![feature(fn_traits)]
+
+mod interactive_cli;
 
 use clap::{self, builder::ArgPredicate, *};
 
@@ -30,8 +33,6 @@ fn main() {
 				.action(clap::ArgAction::Set),
 		);
 
-	dbg!(env!("CARGO_PKG_AUTHORS"));
-
 	#[cfg(any(
 		feature = "linux-qt",
 		feature = "linux-gtk",
@@ -60,50 +61,83 @@ fn main() {
 					.action(clap::ArgAction::SetTrue),
 			);
 	}
+
 	#[cfg(feature = "interactive-cli")]
 	{
 		args = args.arg(
-			arg!(-s --script <VALUE> "Allows you to script multiple commands, useful for automation"),
+			arg!(-s --script <VALUE> "Allows you to script multiple commands, useful for automation").action(ArgAction::Append),
 		);
 	}
 
 	let matches = args.get_matches();
-
+	
+	
+	
 	#[cfg(any(
 		feature = "linux-gtk",
 		feature = "linux-qt",
 		feature = "windows-uwp",
-		feature = "windows-native",
-		feature = "interactive-cli"
+		feature = "windows-native"
 	))]
 	{
 		let handler = std::thread::spawn(move || {
-			#[cfg(feature = "linux-gtk")]
-			if matches.get_flag("use_gtk") {
+			#[cfg(all(feature = "linux-qt", feature = "linux-gtk"))]
+			{
+				if matches.get_flag("use_gtk") && !matches.get_flag("nogui") {
+					println!("Using GTK");
+					gtk_gui::init_gtk_gui();
+				}
+				if matches.get_flag("use_qt") && !matches.get_flag("nogui") {
+					println!("Using Qt");
+					// qt_gui::init_qt_gui();
+				}
+			}
+			#[cfg(all(feature = "linux-gtk", not(feature = "linux-qt")))]
+			if !matches.get_flag("nogui") {
 				println!("Using GTK");
 				gtk_gui::init_gtk_gui();
 			}
-			#[cfg(feature = "linux-qt")]
-			if matches.get_flag("use_qt") {
+			#[cfg(all(feature = "linux-qt", not(feature = "linux-gtk")))]
+			if !matches.get_flag("nogui") {
 				println!("Using Qt");
 				// qt_gui::init_qt_gui();
 			}
 			#[cfg(feature = "windows-uwp")]
-			if matches.get_flag("use_w_uwp") {
+			if !matches.get_flag("nogui") {
 				println!("Using Windows UWP");
 				// w_uwp_gui::init_w_uwp_gui();
 			}
 			#[cfg(feature = "windows-native")]
-			if matches.get_flag("use_w_native") {
+			if !matches.get_flag("nogui") {
 				println!("Using Windows Native");
 				// w_native_gui::init_w_native_gui();
 			}
 			#[cfg(feature = "interactive-cli")]
-			{
-				println!("Using interactive CLI"); // unimplemented at the moment
+			if matches.get_flag("nogui") {
+				interactive_cli::init_loop();
+			} else if matches.get_one::<String>("script").is_some() {
+				match interactive_cli::run_commands(matches.get_one("script").unwrap()) {
+					Ok(_) => (),
+					Err(x) => println!("Error: {}", x),
+				}
 			}
 		});
 
 		handler.join().unwrap();
+	}
+	#[cfg(all(
+		feature = "interactive-cli",
+		not(feature = "linux-gtk"),
+		not(feature = "linux-qt"),
+		not(feature = "windows-uwp"),
+		not(feature = "windows-native")
+	))]
+	if matches.get_one::<String>("script").is_some() {
+		match interactive_cli::run_commands(matches.get_one("script").unwrap()) {
+			Ok(_) => (),
+			Err(x) => println!("Error: {}", x),
+		}
+	} else {
+		interactive_cli::init_loop();
 	}
 }

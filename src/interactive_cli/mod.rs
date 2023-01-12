@@ -1,6 +1,6 @@
 // #![warn(clippy::pedantic)] // funny but no
 
-use std::result::Result;
+use std::result::{self, Result};
 
 struct CommandStruct<'a> {
 	name: &'a str,
@@ -46,17 +46,17 @@ fn get_commands() -> [CommandStruct<'static>; 4] {
 			name: "ping",
 			alias: None,
 			func: Box::new(ping_func),
-			help: Some("Test command"),
+			help: Some("Pings everyone in your contact list to see who is available"),
 			help_long: None,
-			usage: "test [args]..",
+			usage: "ping",
 		},
 		CommandStruct {
 			name: "exit",
 			alias: Some(vec!["q", "quit"]),
 			func: Box::new(exit_func),
-			help: Some("Test command"),
+			help: Some("Exits the program"),
 			help_long: None,
-			usage: "test [args]..",
+			usage: "exit",
 		},
 	]
 }
@@ -67,7 +67,7 @@ fn exit_func(_args: Option<Vec<String>>) -> Result<Option<String>, String> {
 }
 
 fn ping_func(_args: Option<Vec<String>>) -> Result<Option<String>, String> {
-	Ok(None)
+	Ok(Some("Hmmm".to_owned()))
 }
 
 fn get_command(name: &str) -> Result<CommandStruct, &str> {
@@ -124,11 +124,8 @@ fn help_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
 	Ok(None)
 }
 
-pub fn init() {
+pub fn init_loop() {
 	println!("Use `help` for more information.");
-
-	#[cfg(debug_assertions)]
-	dbg!(get_commands());
 
 	loop {
 		use std::io;
@@ -140,33 +137,37 @@ pub fn init() {
 			.read_line(&mut buf)
 			.expect("Couldnt read buffer");
 
-		// TODO add handling for  a delimiter of some sort to allow multiple commands to run
-		// for scripting, exit on error if used
-
-		let args = shellwords::split(&buf).expect("Invalid quotes");
-
-		let mut command_found = false;
-
-		for i in get_commands() {
-			if i.name.eq(&args[0]) {
-				command_found = true;
-				let new_args = {
-					if !args.split_at(1).1.to_vec().is_empty() {
-						Option::Some(args.split_at(1).1.to_vec())
-					} else {
-						None
-					}
-				};
-				let result = i.func.call((new_args,));
-				match result {
-					Ok(_) => (),
-					Err(_) => println!("Error: {:?}", result.err().unwrap()),
-				}
-			}
-		}
-
-		if !command_found {
-			println!("Command {} not found.", args[0]);
+		match run_commands(&buf) {
+			Ok(_) => (),
+			Err(x) => println!("Error: {}", x),
 		}
 	}
+}
+
+pub fn run_commands(buf: &String) -> Result<Option<String>, String> {
+	let args = shellwords::split(&buf).expect("Invalid quotes");
+
+	// dbg!(&args);
+
+	let new_args = {
+		if !args.split_at(1).1.to_vec().is_empty() {
+			Option::Some(args.split_at(1).1.to_vec())
+		} else {
+			None
+		}
+	};
+
+	match run_command(&args[0], new_args) {
+		Ok(_) => return Ok(None),
+		Err(err) => return Err(err),
+	}
+}
+
+pub fn run_command(name: &String, args: Option<Vec<String>>) -> Result<Option<String>, String> {
+	let result = get_command(&name);
+
+	return match result {
+		Ok(_) => result.ok().unwrap().func.call((args,)),
+		Err(e) => return Err(e.to_owned()),
+	};
 }
