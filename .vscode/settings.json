@@ -2,5 +2,6 @@
 	"rust-analyzer.files.excludeDirs": [
 		"target"
 	],
-	"rust-analyzer.cargo.features": ["default", "debug", "linux-gtk", "linux-qt"] /* ["linux-gtk", "linux-qt"] */
+	"rust-analyzer.cargo.features": ["linux-gtk"],
+	// "rust-analyzer.check.command": "clippy"
 }
