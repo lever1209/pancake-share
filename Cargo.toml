@@ -6,8 +6,13 @@ name = "media-railway"
 version = "0.0.0"
 edition = "2021"
 
+# [profile.release]
+#
+# panic = 'abort' # lmao, not worth the .2 mb decrease in size
+
 [dependencies]
 
+shellwords = "1.1.0"
 clap = { version = "4.0.32", features = ["derive"] }
 smoltcp = "0.8.2"
 

@@ -1,6 +1,7 @@
 {
 	"rust-analyzer.files.excludeDirs": [
-		".wine_prefix"
+		"target"
 	],
-	"rust-analyzer.cargo.features": ["windows-native"]
+	"rust-analyzer.cargo.features": ["linux-gtk"],
+	// "rust-analyzer.check.command": "clippy"
 }
