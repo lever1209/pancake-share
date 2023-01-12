@@ -66,18 +66,6 @@ do
 	info_func
 	;;
 	
-	wine)
-	echo Running windows binary with wine
-	WINEPREFIX=$PWD/.wine_prefix wine ./target/x86_64-pc-windows-gnu/debug/media-railway.exe
-	;;
-	
-	copy)
-	echo Copying windows binary to windows testing dir
-	rm windows-dir/media-railway.exe
-	# windows-dir/ is a symlink to my windows partition for better testing
-	cp ./target/x86_64-pc-windows-gnu/debug/media-railway.exe windows-dir/
-	;;
-	
 	*)
 	echo Invalid input.
 	help_func

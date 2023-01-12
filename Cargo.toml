@@ -4,6 +4,10 @@
 
 name = "media-railway"
 version = "0.0.0"
+authors = ["Nora S. <leverplays@gmail.com>"]
+description = "a simple p2p file/media sharing program"
+readme = "README.md"
+license = "BSD 3-Clause \"New\" or \"Revised\" License"
 edition = "2021"
 
 [dependencies]
@@ -17,16 +21,24 @@ nwd = { package = "native-windows-derive", version = "1.0.5", optional = true }
 
 gtk = { package = "gtk4", version = "0.5.5", optional = true }
 
+# research:
+# iui = "0.3"
+# iced = "0.6"
+
 [features]
 
-windows-native = ["windows-os", "dep:nwd", "dep:nwg"]
+default = [ "interactive-cli" ]
 
-windows-uwp = ["windows-os"]
+debug = ["debug-logging", "debug-options"]
+debug-logging = []
+debug-options = []
+
+interactive-cli = []
 
 windows-os = ["dep:windows"]
+windows-native = ["windows-os", "dep:nwd", "dep:nwg"]
+windows-uwp = ["windows-os"]
 
 linux-os = []
-
 linux-gtk = ["linux-os", "dep:gtk"]
-
 linux-qt = ["linux-os"]
