@@ -1,5 +1,7 @@
 use gtk::prelude::*;
 use gtk::{Application, ApplicationWindow, Button};
+
+use crate::interactive_cli;
 const APP_ID: &str = "org.gtk_rs.HelloWorld3";
 
 pub fn init_gtk_gui() {
@@ -26,7 +28,10 @@ fn build_ui(app: &Application) {
 	// Connect to "clicked" signal of `button`
 	button.connect_clicked(move |button| {
 		// Set the label to "Hello World!" after the button has been clicked on
-		button.set_label("button pushed");
+		match interactive_cli::run_command(&"test".to_owned(), Some(vec!["nuke".to_owned()])) {
+			Ok(_) => button.set_label("Ok"),
+			Err(_) => button.set_label("Err"),
+		}
 	});
 
 	// Create a window

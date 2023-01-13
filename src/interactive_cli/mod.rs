@@ -1,6 +1,11 @@
 // #![warn(clippy::pedantic)] // funny but no
 
-use std::result::{self, Result};
+use std::{
+	fmt::Arguments,
+	io::{Read, Write},
+	net::{Ipv4Addr, SocketAddrV4, TcpListener, TcpStream},
+	result::{self, Result},
+};
 
 struct CommandStruct<'a> {
 	name: &'a str,
@@ -24,7 +29,7 @@ impl std::fmt::Debug for CommandStruct<'_> {
 	}
 }
 
-fn get_commands() -> [CommandStruct<'static>; 4] {
+fn get_commands() -> [CommandStruct<'static>; 7] {
 	[
 		CommandStruct {
 			name: "help",
@@ -43,12 +48,20 @@ fn get_commands() -> [CommandStruct<'static>; 4] {
 			usage: "test [args]..",
 		},
 		CommandStruct {
-			name: "ping",
+			name: "receive_data",
 			alias: None,
-			func: Box::new(ping_func),
-			help: Some("Pings everyone in your contact list to see who is available"),
+			func: Box::new(receive_data_func),
+			help: None,
 			help_long: None,
-			usage: "ping",
+			usage: "receive_data",
+		},
+		CommandStruct {
+			name: "send_data",
+			alias: None,
+			func: Box::new(send_data_func),
+			help: None,
+			help_long: None,
+			usage: "send_data",
 		},
 		CommandStruct {
 			name: "exit",
@@ -58,7 +71,56 @@ fn get_commands() -> [CommandStruct<'static>; 4] {
 			help_long: None,
 			usage: "exit",
 		},
+		CommandStruct {
+			name: "clear",
+			alias: Some(vec!["cls"]),
+			func: Box::new(clear_screen_func),
+			help: Some("clears the screen buffer"),
+			help_long: None,
+			usage: "clear",
+		},
+		CommandStruct {
+			name: "send_file",
+			alias: None,
+			func: Box::new(send_file_func),
+			help: None,
+			help_long: None,
+			usage: "send_file <full path to file>",
+		},
 	]
+}
+
+fn send_file_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
+	
+	
+	
+	Ok(None)
+}
+
+fn clear_screen_func(_args: Option<Vec<String>>) -> Result<Option<String>, String> {
+	#[cfg(feature = "windows-os")]
+	// print!("\x1B[2J\x1B[1;1H");
+	// print!("{}[2J", 27 as char);
+	println!(
+		"Unimplemented feature because of how wack windows is. Go get a real operating system."
+	);
+
+	#[cfg(feature = "linux-os")]
+	print!("{esc}c", esc = 27 as char);
+	Ok(None)
+}
+
+fn send_data_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
+	let mut stream = TcpStream::connect("127.0.0.1:25565").unwrap();
+
+	match stream.write_fmt(format_args!("{:?}", args.unwrap())) {
+		Ok(_) => (),
+		Err(e) => println!("Err: {}", e),
+	}
+
+	stream.shutdown(std::net::Shutdown::Both).ok();
+
+	Ok(None)
 }
 
 fn exit_func(_args: Option<Vec<String>>) -> Result<Option<String>, String> {
@@ -66,8 +128,21 @@ fn exit_func(_args: Option<Vec<String>>) -> Result<Option<String>, String> {
 	std::process::exit(0)
 }
 
-fn ping_func(_args: Option<Vec<String>>) -> Result<Option<String>, String> {
-	Ok(Some("Hmmm".to_owned()))
+fn receive_data_func(_args: Option<Vec<String>>) -> Result<Option<String>, String> {
+	let loopback = Ipv4Addr::new(0, 0, 0, 0);
+	let socket = SocketAddrV4::new(loopback, 25565);
+	let listener = TcpListener::bind(socket).unwrap();
+	println!(
+		"Listening on {}, access this port to end the program",
+		listener.local_addr().unwrap()
+	);
+	let (mut tcp_stream, addr) = listener.accept().unwrap();
+	println!("Connection received! {:?} is sending data.", addr);
+	let mut input = String::new();
+	let _ = tcp_stream.read_to_string(&mut input);
+	println!("{:?} \"{}\"", addr, input.trim());
+
+	Ok(None)
 }
 
 fn get_command(name: &str) -> Result<CommandStruct, &str> {
@@ -149,17 +224,21 @@ pub fn run_commands(buf: &String) -> Result<Option<String>, String> {
 
 	// dbg!(&args);
 
-	let new_args = {
-		if !args.split_at(1).1.to_vec().is_empty() {
-			Option::Some(args.split_at(1).1.to_vec())
-		} else {
-			None
-		}
-	};
+	if !args.is_empty() {
+		let new_args = {
+			if !args.split_at(1).1.to_vec().is_empty() {
+				Option::Some(args.split_at(1).1.to_vec())
+			} else {
+				None
+			}
+		};
 
-	match run_command(&args[0], new_args) {
-		Ok(_) => return Ok(None),
-		Err(err) => return Err(err),
+		match run_command(&args[0], new_args) {
+			Ok(_) => return Ok(None),
+			Err(err) => return Err(err),
+		}
+	} else {
+		return Err("Input is empty.".to_owned());
 	}
 }
 

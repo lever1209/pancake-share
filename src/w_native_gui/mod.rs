@@ -1,7 +1,7 @@
 use nwd::NwgUi;
 use nwg::NativeUi;
 
-pub fn init_w_native_gui() {#[cfg(feature = "debug-logging")]
+pub fn init() {#[cfg(feature = "debug-logging")]
 	println!("Init windows gui");
 	nwg::init().expect("Failed to init Native Windows GUI");
 	nwg::Font::set_global_family("Segoe UI").expect("Failed to set default font");

@@ -2,7 +2,7 @@
 	"rust-analyzer.files.excludeDirs": [
 		"target"
 	],
-	"rust-analyzer.cargo.features": ["linux-gtk", "linux-qt", "interactive-cli"],
+	"rust-analyzer.cargo.features": ["interactive-cli", "linux-gtk"],
 	"rust-analyzer.cargo.noDefaultFeatures": true,
 	// "rust-analyzer.check.command": "clippy"
 }

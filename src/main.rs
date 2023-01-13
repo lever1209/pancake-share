@@ -1,9 +1,13 @@
-#![windows_subsystem = "windows"]
+// #![windows_subsystem = "windows"] // cant use or cli fails under windows; immediately calling hide_console_window is the current workaround
 #![feature(fn_traits)]
 
 mod interactive_cli;
 
-use clap::{self, builder::ArgPredicate, *};
+
+#[cfg(all(feature = "linux-qt", feature = "linux-gtk"))]
+use clap::builder::{self, ArgPredicate};
+
+use clap::{self, *};
 
 #[cfg(feature = "linux-gtk")]
 mod gtk_gui;
@@ -33,7 +37,7 @@ fn main() {
 				.action(clap::ArgAction::Set),
 		);
 
-	#[cfg(any(
+	#[cfg(any( // TODO assumes cli is default, refactor all instances to include case where cli is absent
 		feature = "linux-qt",
 		feature = "linux-gtk",
 		feature = "windows-uwp",
@@ -70,9 +74,9 @@ fn main() {
 	}
 
 	let matches = args.get_matches();
-	
-	
-	
+
+	unwrap_config(matches.get_one::<String>("config_path"));
+
 	#[cfg(any(
 		feature = "linux-gtk",
 		feature = "linux-qt",
@@ -105,20 +109,24 @@ fn main() {
 			#[cfg(feature = "windows-uwp")]
 			if !matches.get_flag("nogui") {
 				println!("Using Windows UWP");
+				hide_console_window();
 				// w_uwp_gui::init_w_uwp_gui();
 			}
 			#[cfg(feature = "windows-native")]
 			if !matches.get_flag("nogui") {
 				println!("Using Windows Native");
-				// w_native_gui::init_w_native_gui();
+				hide_console_window();
+				w_native_gui::init();
 			}
 			#[cfg(feature = "interactive-cli")]
-			if matches.get_flag("nogui") {
-				interactive_cli::init_loop();
-			} else if matches.get_one::<String>("script").is_some() {
-				match interactive_cli::run_commands(matches.get_one("script").unwrap()) {
-					Ok(_) => (),
-					Err(x) => println!("Error: {}", x),
+			{
+				if matches.get_flag("nogui") {
+					interactive_cli::init_loop();
+				} else if matches.get_one::<String>("script").is_some() {
+					match interactive_cli::run_commands(matches.get_one("script").unwrap()) {
+						Ok(_) => (),
+						Err(x) => println!("Error: {}", x),
+					}
 				}
 			}
 		});
@@ -141,3 +149,22 @@ fn main() {
 		interactive_cli::init_loop();
 	}
 }
+
+#[cfg(feature = "windows-os")]
+fn hide_console_window() {
+	unsafe {
+		winapi::um::wincon::FreeConsole();
+	}
+}
+
+fn unwrap_config(path: Option<&String>) {
+	
+	// TODO
+	
+}
+
+// struct ConfigStruct<'a> {
+// 	key_path: &'a str,
+// }
+
+// const CONFIG_DATA: ConfigStruct = ConfigStruct { key_path: "" };
