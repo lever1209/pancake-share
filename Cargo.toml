@@ -23,7 +23,7 @@ clap = { version = "4.0.32", features = ["derive"] }
 # librsync = "0.2.1"
 
 # cli
-shellwords = { version = "1.1.0", optional = true }
+# shellwords = { version = "1.1.0", optional = true } # replaced by interactive_cli::super_duper_ultra_spliterator
 
 # windows
 windows = { version = "0.43.0", optional = true }
@@ -47,7 +47,7 @@ debug = ["debug-logging", "debug-options"]
 debug-logging = []
 debug-options = []
 
-interactive-cli = ["dep:shellwords"]
+interactive-cli = []
 
 windows-os = ["dep:windows", "winapi"]
 windows-native = ["windows-os", "dep:nwd", "dep:nwg"]

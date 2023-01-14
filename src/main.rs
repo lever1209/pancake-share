@@ -123,9 +123,9 @@ fn main() {
 				if matches.get_flag("nogui") {
 					interactive_cli::init_loop();
 				} else if matches.get_one::<String>("script").is_some() {
-					match interactive_cli::run_commands(matches.get_one("script").unwrap()) {
+					match interactive_cli::run_commands(matches.get_one::<String>("script").unwrap()) {
 						Ok(_) => (),
-						Err(x) => println!("Error: {}", x),
+						Err(x) => println!("Error: {x}"),
 					}
 				}
 			}
@@ -141,7 +141,7 @@ fn main() {
 		not(feature = "windows-native")
 	))]
 	if matches.get_one::<String>("script").is_some() {
-		match interactive_cli::run_commands(matches.get_one("script").unwrap()) {
+		match interactive_cli::run_commands(matches.get_one::<String>("script").unwrap()) {
 			Ok(_) => (),
 			Err(x) => println!("Error: {}", x),
 		}

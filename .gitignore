@@ -1,11 +1,7 @@
-# wine prefix folder
-.wine_prefix
-
-# symlink to my windows partition for better testing on windows
-windows-dir
-
-# not everyone likes tabs over spaces
+# vscode crap
+.vscode/
 rustfmt.toml
+NOTES
 
 # standard rust gitignore
 /target
