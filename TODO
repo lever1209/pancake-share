@@ -1,0 +1,8 @@
+offline messaging if no one is able to receive the message
+	will depend on optional remotes you can add to relay messages if the others go online while you are offline
+	contacts can act as remotes
+	no relays will relay files by default
+
+optional key based encryption
+	it will be disabled by default, and users will be warned about this
+	after i get mostly positive feedback about the encryption implementation it will be enabled as default in all subsequent builds
