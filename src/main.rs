@@ -2,7 +2,7 @@
 #![feature(fn_traits)]
 
 mod interactive_cli;
-
+mod network;
 
 #[cfg(all(feature = "linux-qt", feature = "linux-gtk"))]
 use clap::builder::{self, ArgPredicate};

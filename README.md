@@ -14,3 +14,8 @@ linux:
 windows:
   the command listed below may not be as up to date as the one in the build script, if you have issues please refer to the build script
   `cargo build --features=windows-native --release --target=x86_64-pc-windows-gnu`
+
+# Special Thanks
+	
+	Otikash - beta tester
+	

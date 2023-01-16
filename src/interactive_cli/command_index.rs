@@ -1,5 +1,4 @@
 type CommandFunction = fn(Option<Vec<String>>) -> Result<Option<String>, String>;
-
 pub struct CommandStruct<'a> {
 	pub name: &'a str,
 	pub alias: Option<Vec<&'a str>>,
@@ -9,7 +8,7 @@ pub struct CommandStruct<'a> {
 	pub usage: &'a str,
 }
 
-pub fn get_commands() -> [CommandStruct<'static>; 4] {
+pub fn get_commands() -> [CommandStruct<'static>; 8] {
 	[
 		CommandStruct {
 			name: "help",
@@ -43,6 +42,38 @@ pub fn get_commands() -> [CommandStruct<'static>; 4] {
 			help_long: None,
 			usage: "test <args>",
 		},
+		CommandStruct {
+			name: "rec",
+			alias: None,
+			func: rec_func,
+			help: Some("Receive raw"),
+			help_long: Some("Receives raw from a port"),
+			usage: "rec <port>",
+		},
+		CommandStruct {
+			name: "tra",
+			alias: None,
+			func: tra_func,
+			help: Some("Transmit text"),
+			help_long: Some("Transmits text using an address:port pair"),
+			usage: "tra <addr> <data>",
+		},
+		CommandStruct {
+			name: "rec_file",
+			alias: None,
+			func: rec_file_func,
+			help: Some("Receive files"),
+			help_long: Some("Receives files from a port"),
+			usage: "rec_file <port>",
+		},
+		CommandStruct {
+			name: "tra_file",
+			alias: None,
+			func: tra_file_func,
+			help: Some("Transmit file"),
+			help_long: Some("Transmits files using an address:port pair"),
+			usage: "tra_file <addr> <filepath>",
+		},
 	]
 }
 
@@ -56,6 +87,34 @@ pub fn get_command(name: &str) -> Result<CommandStruct, &str> {
 }
 
 // COMMAND FUNCTIONS
+
+fn rec_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
+	// network::receive_data_func(args.unwrap())
+	
+	println!("Disabled because its buggy as all hell, and a security vulnrability");
+	Ok(None)
+}
+
+fn tra_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
+	// network::send_data_func(args.unwrap())
+	
+	println!("Disabled because its buggy as all hell, and a security vulnrability");
+	Ok(None)
+}
+
+fn rec_file_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
+	// network::receive_file_func(args.unwrap())
+	
+	println!("Disabled because its buggy as all hell, and a security vulnrability");
+	Ok(None)
+}
+
+fn tra_file_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
+	// network::send_file_func(args.unwrap())
+	
+	println!("Disabled because its buggy as all hell, and a security vulnrability");
+	Ok(None)
+}
 
 fn test_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
 	for arg in args.unwrap() {
@@ -86,14 +145,13 @@ fn exit_func(_args: Option<Vec<String>>) -> Result<Option<String>, String> {
 }
 
 fn help_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
-
 	if args.is_none() {
 		for i in get_commands() {
 			println!(
 				"{}\t\t{:?}",
 				i.name,
 				i.help
-					.unwrap_or_else(|| "There is no help available for this command.")
+					.unwrap_or("There is no help available for this command.")
 			);
 			println!("\t\t{:?}", i.usage);
 		}
@@ -109,7 +167,7 @@ fn help_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
 					.unwrap_or_else(|| get_command(name)
 						.unwrap()
 						.help
-						.unwrap_or_else(|| "There is no help available for this command."))
+						.unwrap_or("There is no help available for this command."))
 			);
 		} else {
 			println!("Invalid command: {}", name);

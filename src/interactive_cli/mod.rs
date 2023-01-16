@@ -89,6 +89,8 @@ fn super_duper_ultra_spliterator(buf: &str) -> Vec<Vec<String>> {
 			if !result_single_buffer.is_empty() {
 				result_single.push(result_single_buffer.clone());
 				result_single_buffer.clear();
+			}
+			if !result_single.is_empty() {
 				result_multiple.push(result_single.clone());
 				result_single.clear();
 			}
