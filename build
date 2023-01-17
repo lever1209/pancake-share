@@ -1,15 +1,22 @@
 #!/bin/bash
 
-EXTRA_ARGS = "--release"
+EXTRA_ARGS="--release"
 
 function help_func() {
 	echo """
-Help:
+help		This help text
+info		Information about the application and why you either need it or dont
+
+windows		Builds the windows version of pancake-share
+linux		Builds the linux version of pancake-share
+
+clean		Cleans the build environment
+all			Builds all applicable versions, used internally to build all release binaries
 """
 }
 function info_func() {
 	echo """
-Info:
+Empty for now, the application hasnt even left development. Why are you here?
 """
 }
 function clean_func() {
@@ -18,12 +25,20 @@ function clean_func() {
 }
 
 function build_windows() {
-	echo Building windows binaries in target/x86_64-pc-windows-gnu/media-railway.exe$'\n'
-	cargo build --target x86_64-pc-windows-gnu --features windows-native ${EXTRA_ARGS}
+	echo Building windows binaries in target/x86_64-pc-windows-gnu/pancake-share.exe$'\n'
+	cargo build --target x86_64-pc-windows-gnu --features=windows-os ${EXTRA_ARGS}
 }
 function build_linux() {
-	echo Building linux binaries in target/x86_64-pc-windows-gnu/media-railway$'\n'
-	cargo build --target x86_64-unknown-linux-gnu --features linux-gtk ${EXTRA_ARGS}
+	echo Building linux binaries in target/x86_64-pc-windows-gnu/pancake-share$'\n'
+	cargo build --target x86_64-unknown-linux-gnu --features=linux-os ${EXTRA_ARGS}
+}
+function build_all() {
+	build_linux
+	build_windows
+	EXTRA_ARGS=""
+	build_linux
+	build_windows
+	EXTRA_ARGS="--release"
 }
 
 [[ -z $@ ]] && {
@@ -64,6 +79,10 @@ do
 	
 	info)
 	info_func
+	;;
+	
+	all)
+	build_all
 	;;
 	
 	*)

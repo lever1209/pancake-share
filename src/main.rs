@@ -123,7 +123,9 @@ fn main() {
 				if matches.get_flag("nogui") {
 					interactive_cli::init_loop();
 				} else if matches.get_one::<String>("script").is_some() {
-					match interactive_cli::run_commands(matches.get_one::<String>("script").unwrap()) {
+					match interactive_cli::run_commands(
+						matches.get_one::<String>("script").unwrap(),
+					) {
 						Ok(_) => (),
 						Err(x) => println!("Error: {x}"),
 					}
@@ -158,9 +160,8 @@ fn hide_console_window() {
 }
 
 fn unwrap_config(path: Option<&String>) {
-	
+
 	// TODO
-	
 }
 
 // struct ConfigStruct<'a> {

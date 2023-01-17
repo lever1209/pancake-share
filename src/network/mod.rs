@@ -32,11 +32,6 @@ pub fn receive_data_func(args: Vec<String>) -> Result<Option<String>, String> {
 pub fn send_file_func(args: Vec<String>) -> Result<Option<String>, String> {
 	let stream = TcpStream::connect(&args[0]).unwrap();
 
-	// match stream.write_fmt(format_args!("{:?}", args.split_at(1).1)) {
-	// 	Ok(_) => (),
-	// 	Err(e) => println!("Err: {e}"),
-	// }
-
 	match net_io::push_connection(&stream) {
 		Ok(_) => {
 			stream.shutdown(std::net::Shutdown::Both).ok();
@@ -46,53 +41,56 @@ pub fn send_file_func(args: Vec<String>) -> Result<Option<String>, String> {
 	}
 }
 
-pub fn receive_file_func(args: Vec<String>) -> Result<Option<String>, String> {
+pub fn receive_file_func(args: Vec<String>) -> Ret {
 	let loopback = Ipv4Addr::new(0, 0, 0, 0);
 	let socket = SocketAddrV4::new(loopback, args[0].parse::<u16>().unwrap());
-	// Enable port 7878 binding
-	let receiver_listener = TcpListener::bind(socket).expect("Failed and bind with the sender");
-	// Getting a handle of the underlying thread.
-	let mut thread_vec: Vec<thread::JoinHandle<()>> = Vec::new();
-	// listen to incoming connections messages and bind them to a sever socket address.
-	for stream in receiver_listener.incoming() {
-		let stream = stream.expect("failed");
-		// let the receiver connect with the sender
-		let handle = thread::spawn(move || {
-			//receiver failed to read from the stream
-			handle_sender(stream).unwrap_or_else(|error| eprintln!("{:?}", error))
-		});
 
-		// Push messages in the order they are sent
-		thread_vec.push(handle);
+	match net_io::start_receiving_server(std::net::SocketAddr::V4(socket)) {
+		Ok(_) => Ok(None),
+		Err(e) => Err(e),
 	}
-
-	for handle in thread_vec {
-		// return each single value Output contained in the heap
-		handle.join().unwrap();
-	}
-	// success value
-	Ok(None)
 }
 
 mod net_io {
 	use std::{
 		io::{self, BufRead, BufReader, Read, Write},
-		net::TcpStream,
+		net::{SocketAddr, TcpListener, TcpStream},
 		thread, time,
 	};
 
-	const BEGIN: u8 = 1;
-	const END: u8 = 3;
-	const NEXT: u8 = 5;
+	const LENGTH: u16 = 2;
 	const VERSION: u8 = 12;
 
 	const GP_PACKET: u8 = 14;
-	const NET_FILE: u8 = 17;
 	const SELF_ID: u8 = 19;
 	const REQUEST_CONNECTION: u8 = 20;
 	const ACCEPT_CONNECTION: u8 = 21;
 
-	const LARGE_PACKET: u8 = 200;
+	pub fn start_receiving_server(socket: SocketAddr) -> super::Ret {
+		// Enable port 7878 binding
+		let receiver_listener = TcpListener::bind(socket).expect("Failed and bind with the sender");
+		// Getting a handle of the underlying thread.
+		let mut thread_vec: Vec<thread::JoinHandle<()>> = Vec::new();
+		// listen to incoming connections messages and bind them to a sever socket address.
+		for stream in receiver_listener.incoming() {
+			let stream = stream.expect("failed");
+			// let the receiver connect with the sender
+			let handle = thread::spawn(move || {
+				//receiver failed to read from the stream
+				handle_sender(stream).unwrap_or_else(|error| eprintln!("{:?}", error))
+			});
+
+			// Push messages in the order they are sent
+			thread_vec.push(handle);
+		}
+
+		for handle in thread_vec {
+			// return each single value Output contained in the heap
+			handle.join().unwrap();
+		}
+
+		Ok(None)
+	}
 
 	pub fn push_connection(mut stream: &TcpStream) -> super::Ret {
 		use std::io::{self, prelude::*, BufReader, Write};
@@ -117,7 +115,10 @@ mod net_io {
 			// Read input information
 			reader.read_until(b'\n', &mut buffer);
 
-			println!("read from server:{}", str::from_utf8(&buffer).unwrap().trim());
+			println!(
+				"read from server:{}",
+				str::from_utf8(&buffer).unwrap().trim()
+			);
 		}
 		Ok(None)
 

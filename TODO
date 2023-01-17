@@ -6,3 +6,5 @@ offline messaging if no one is able to receive the message
 optional key based encryption
 	it will be disabled by default, and users will be warned about this
 	after i get mostly positive feedback about the encryption implementation it will be enabled as default in all subsequent builds
+
+http/s site for people to view hosted content without needing the app installed

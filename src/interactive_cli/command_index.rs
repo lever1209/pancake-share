@@ -1,3 +1,5 @@
+use crate::network;
+
 type CommandFunction = fn(Option<Vec<String>>) -> Result<Option<String>, String>;
 pub struct CommandStruct<'a> {
 	pub name: &'a str,
@@ -89,35 +91,26 @@ pub fn get_command(name: &str) -> Result<CommandStruct, &str> {
 // COMMAND FUNCTIONS
 
 fn rec_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
-	// network::receive_data_func(args.unwrap())
-	
-	println!("Disabled because its buggy as all hell, and a security vulnrability");
-	Ok(None)
+	network::receive_data_func(args.unwrap())
 }
 
 fn tra_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
-	// network::send_data_func(args.unwrap())
-	
-	println!("Disabled because its buggy as all hell, and a security vulnrability");
-	Ok(None)
+	network::send_data_func(args.unwrap())
 }
 
 fn rec_file_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
-	// network::receive_file_func(args.unwrap())
-	
-	println!("Disabled because its buggy as all hell, and a security vulnrability");
-	Ok(None)
+	network::receive_file_func(args.unwrap())
 }
 
 fn tra_file_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
-	// network::send_file_func(args.unwrap())
-	
-	println!("Disabled because its buggy as all hell, and a security vulnrability");
-	Ok(None)
+	network::send_file_func(args.unwrap())
 }
 
 fn test_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
 	for arg in args.unwrap() {
+		if arg == "nuke" {
+			return Err("Nuked".to_string());
+		}
 		print!("[{arg}] ");
 	}
 
@@ -131,7 +124,7 @@ fn clear_screen_func(_args: Option<Vec<String>>) -> Result<Option<String>, Strin
 	// print!("\x1B[2J\x1B[1;1H");
 	// print!("{}[2J", 27 as char);
 	println!(
-		"Unimplemented feature because of how wack windows is. Go get a real operating system."
+		"Unimplemented feature because of how wack windows is."
 	);
 
 	#[cfg(feature = "linux-os")]
