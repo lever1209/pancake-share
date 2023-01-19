@@ -1,6 +1,4 @@
-use std::{io::*, net::*, result::Result, thread};
-
-use self::net_io::handle_sender;
+use std::{io::*, net::*, result::Result};
 
 type Ret = Result<Option<String>, String>;
 
@@ -30,22 +28,14 @@ pub fn receive_data_func(args: Vec<String>) -> Result<Option<String>, String> {
 }
 
 pub fn send_file_func(args: Vec<String>) -> Result<Option<String>, String> {
-	let stream = TcpStream::connect(&args[0]).unwrap();
-
-	match net_io::push_connection(&stream) {
-		Ok(_) => {
-			stream.shutdown(std::net::Shutdown::Both).ok();
-			Ok(None)
-		}
+	match net_io::send_message() {
+		Ok(_) => Ok(None),
 		Err(e) => Err(e),
 	}
 }
 
 pub fn receive_file_func(args: Vec<String>) -> Ret {
-	let loopback = Ipv4Addr::new(0, 0, 0, 0);
-	let socket = SocketAddrV4::new(loopback, args[0].parse::<u16>().unwrap());
-
-	match net_io::start_receiving_server(std::net::SocketAddr::V4(socket)) {
+	match net_io::init_server() {
 		Ok(_) => Ok(None),
 		Err(e) => Err(e),
 	}
@@ -54,30 +44,50 @@ pub fn receive_file_func(args: Vec<String>) -> Ret {
 mod net_io {
 	use std::{
 		io::{self, BufRead, BufReader, Read, Write},
-		net::{SocketAddr, TcpListener, TcpStream},
+		net::{Ipv4Addr, SocketAddr, SocketAddrV4, TcpListener, TcpStream},
 		thread, time,
 	};
 
-	const LENGTH: u16 = 2;
-	const VERSION: u8 = 12;
+	use borsh::{BorshDeserialize, BorshSerialize};
+	use RejectionReason::*;
 
-	const GP_PACKET: u8 = 14;
-	const SELF_ID: u8 = 19;
-	const REQUEST_CONNECTION: u8 = 20;
-	const ACCEPT_CONNECTION: u8 = 21;
+	use version_0_packet::*;
 
-	pub fn start_receiving_server(socket: SocketAddr) -> super::Ret {
-		// Enable port 7878 binding
+	#[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug)]
+	struct Packet {
+		self_id: String,
+		purpose: ConnectionPurpose,
+	}
+
+	const VERSION: usize = 0;
+	const SIZE: (usize, usize) = (1, 2);
+
+	mod version_0_packet {
+		use borsh::{BorshDeserialize, BorshSerialize};
+
+		#[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug)]
+		pub enum ConnectionPurpose {
+			RequestConnection,
+			RejectRequest,
+			AcceptRequest,
+		}
+	}
+
+	pub fn init_server() -> super::Ret {
+		let socket = SocketAddrV4::new(Ipv4Addr::new(0, 0, 0, 0), crate::get_port());
+
 		let receiver_listener = TcpListener::bind(socket).expect("Failed and bind with the sender");
-		// Getting a handle of the underlying thread.
+
 		let mut thread_vec: Vec<thread::JoinHandle<()>> = Vec::new();
-		// listen to incoming connections messages and bind them to a sever socket address.
+
 		for stream in receiver_listener.incoming() {
 			let stream = stream.expect("failed");
-			// let the receiver connect with the sender
+
 			let handle = thread::spawn(move || {
-				//receiver failed to read from the stream
-				handle_sender(stream).unwrap_or_else(|error| eprintln!("{:?}", error))
+				match handle_client(stream) {
+					Ok(_) => (),
+					Err(e) => eprintln!("Error: {e}"),
+				};
 			});
 
 			// Push messages in the order they are sent
@@ -85,75 +95,116 @@ mod net_io {
 		}
 
 		for handle in thread_vec {
-			// return each single value Output contained in the heap
 			handle.join().unwrap();
 		}
+		Ok(None)
+	}
+
+	pub fn send_message() -> super::Ret {
+		let mut stream = match TcpStream::connect("127.0.0.1:59217") {
+			Ok(e) => e,
+			Err(_) => return Err("Could not get outgoing stream.".to_string()),
+		};
+		{
+			// create scope for easier management
+			let packet = Packet {
+				self_id: "developer-self-test-id".to_owned(),
+				purpose: ConnectionPurpose::RequestConnection,
+			};
+
+			let mut request: Vec<u8> = Vec::new();
+			let encoded_packet = packet.try_to_vec().unwrap();
+
+			request.resize(20, 0);
+
+			request[VERSION] = 1;
+			request[SIZE.0] = encoded_packet.len() as u8;
+			request[SIZE.1] = (encoded_packet.len() >> 8) as u8;
+
+			for b in encoded_packet {
+				// add bytes from encoded_packet to request
+				request.push(b);
+			}
+
+			Write::write(&mut stream, &request).expect("Failed to write to message stream.");
+		}
+
+		let mut reader = BufReader::new(&stream);
+		let mut buffer: Vec<u8> = Vec::new();
 
 		Ok(None)
 	}
 
-	pub fn push_connection(mut stream: &TcpStream) -> super::Ret {
-		use std::io::{self, prelude::*, BufReader, Write};
-		use std::net::TcpStream;
-		use std::str;
+	pub fn handle_client(mut stream: TcpStream) -> super::Ret {
+		let mut packet_header = [0; 20];
+		let header_bytes_read = stream.read(&mut packet_header).unwrap();
+		if header_bytes_read == 0 {
+			return reject_connection(stream, InvalidRequest, None);
+		}
 
-		// connect
-		// Struct used to start requests to the server.
-		// Check TcpStream Connection to the server
-		// let mut stream = TcpStream::connect("127.0.0.1:7878");
-		for _ in 0..1000 {
-			// Allow sender to enter message input
-			let mut input = String::new();
-			// First access the input message and read it
-			io::stdin().read_line(&mut input).expect("Failed to read");
-			// Write the message so that the receiver can access it
-			Write::write(&mut stream, input.as_bytes()).expect("failed to write");
-			// Add buffering so that the receiver can read messages from the stream
-			let mut reader = BufReader::new(stream);
-			// Check if this input message values are u8
-			let mut buffer: Vec<u8> = Vec::new();
-			// Read input information
-			reader.read_until(b'\n', &mut buffer);
+		// print!("Header: ");
+		// for b in packet_header {
+		// 	print!("[{b}]");
+		// }
+		// println!();
 
-			println!(
-				"read from server:{}",
-				str::from_utf8(&buffer).unwrap().trim()
+		let request_buffer_size =
+			((packet_header[SIZE.1] as u16) << 8) | packet_header[SIZE.0] as u16;
+		if request_buffer_size > 512 {
+			return reject_connection(
+				stream,
+				BufferSizeLimited,
+				Some("Buffer size not allowed above 512 bytes in this context."),
 			);
 		}
-		Ok(None)
+		let mut request_buffer = vec![0; request_buffer_size.into()];
+		let request_bytes_read = stream.read(&mut request_buffer).unwrap();
+		if request_bytes_read == 0 {
+			return reject_connection(
+				stream,
+				DataEmpty,
+				Some("Length of data == 0 (packet sent is just a header)"),
+			);
+		}
 
-		// let to_write = std::time::SystemTime::UNIX_EPOCH
-		// 	.elapsed()
-		// 	.unwrap()
-		// 	.as_micros();
-
-		// // Write::write(stream, &[0, 0, 0, 0, 0]);
-
-		// match Write::write(&mut stream, format!("{to_write}").as_bytes()) {
-		// 	Ok(_) => Ok(None),
-		// 	Err(_) => Err("Failed to write data.".to_string()),
+		// print!("Data: ");
+		// for b in &request_buffer {
+		// 	print!("[{b}]");
 		// }
+		// println!();
+
+		let decoded_packet = Packet::try_from_slice(&request_buffer).unwrap();
+
+		match decoded_packet.purpose {
+			ConnectionPurpose::RequestConnection => process_connection_request(),
+			_ => {
+				reject_connection(stream, InvalidRequest, None);
+				return Err("Invalid request.".to_owned());
+			}
+		};
+
+		match stream.write(&packet_header[..header_bytes_read]) {
+			Ok(_) => (),
+			Err(e) => println!("{e}"),
+		};
+
+		Ok(None)
 	}
 
-	pub fn handle_sender(mut stream: TcpStream) -> io::Result<()> {
-		// Handle multiple access stream
-		let mut buf = [0; 512];
-		for _ in 0..1000 {
-			// let the receiver get a message from a sender
-			let bytes_read = stream.read(&mut buf)?;
-			// sender stream in a mutable variable
-			if bytes_read == 0 {
-				return Ok(());
-			}
-			stream.write(&buf[..bytes_read]);
-			// Print acceptance message
-			//read, print the message sent
-			println!("from the sender:{}", String::from_utf8_lossy(&buf));
+	fn process_connection_request() {}
 
-			// And you can sleep this connection with the connected sender
-			thread::sleep(time::Duration::from_millis(1));
-		}
-		// success value
-		Ok(())
+	#[derive(BorshSerialize, BorshDeserialize, PartialEq, Debug)]
+	enum RejectionReason {
+		InvalidRequest,
+		DataEmpty,
+		BufferSizeLimited,
+	}
+
+	fn reject_connection(
+		stream: TcpStream,
+		reason: RejectionReason,
+		reason2: Option<&str>,
+	) -> super::Ret {
+		Ok(None)
 	}
 }

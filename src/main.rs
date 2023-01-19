@@ -160,12 +160,11 @@ fn hide_console_window() {
 }
 
 fn unwrap_config(path: Option<&String>) {
-
-	// TODO
+	
+	
+	
 }
 
-// struct ConfigStruct<'a> {
-// 	key_path: &'a str,
-// }
-
-// const CONFIG_DATA: ConfigStruct = ConfigStruct { key_path: "" };
+pub fn get_port() -> u16 {
+	59217
+}

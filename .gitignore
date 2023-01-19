@@ -1,7 +1,7 @@
 # vscode crap
 .vscode/
 rustfmt.toml
-NOTES
+NOTES.txt
 
 # standard rust gitignore
 /target
