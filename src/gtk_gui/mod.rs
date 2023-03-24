@@ -28,9 +28,9 @@ fn build_ui(app: &Application) {
 	// Connect to "clicked" signal of `button`
 	button.connect_clicked(move |button| {
 		// Set the label to "Hello World!" after the button has been clicked on
-		match interactive_cli::run_command(&"test".to_owned(), Some(vec!["nuke".to_owned()])) {
-			Ok(_) => button.set_label("Ok"),
-			Err(_) => button.set_label("Err"),
+		match interactive_cli::run_command("test", Some(vec!["nuke".to_owned()])) {
+			Ok(o) => button.set_label(&("Ok: ".to_owned() + &o.unwrap_or("None".to_owned()))),
+			Err(e) => button.set_label(&("Err: ".to_owned() + &e)),
 		}
 	});
 

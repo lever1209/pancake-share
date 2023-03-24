@@ -1,0 +1,6 @@
+for now these are yaml files defining behavior that i need to have constant
+
+why?
+	i cant keep track of a massive project structure in my head
+	yaml is easy to parse for both people and machines
+	i feel this is cleaner than using comments to define unrelated interactions

@@ -2,14 +2,14 @@
 
 // use self::commands::CommandStruct;
 
+use std::io;
+
 mod command_index;
 
 pub fn init_loop() {
 	println!("Use `help` for more information.");
 
 	loop {
-		use std::io;
-
 		print!("cabin~> ");
 		io::Write::flush(&mut io::stdout()).expect("Couldnt flush stdout");
 		let mut buf = String::new();
@@ -25,7 +25,6 @@ pub fn init_loop() {
 }
 
 pub fn run_commands(buf: &str) -> Result<Option<String>, String> {
-	// let args = shellwords::split(&buf).expect("Invalid quotes");
 
 	let args_multiple = &super_duper_ultra_spliterator(buf);
 
@@ -46,7 +45,6 @@ pub fn run_commands(buf: &str) -> Result<Option<String>, String> {
 			Err(err) => return Err(err),
 		}
 	}
-
 	Ok(None)
 }
 

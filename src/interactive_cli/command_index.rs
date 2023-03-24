@@ -10,7 +10,7 @@ pub struct CommandStruct<'a> {
 	pub usage: &'a str,
 }
 
-pub fn get_commands() -> [CommandStruct<'static>; 8] {
+pub fn get_commands() -> [CommandStruct<'static>; 5] {
 	[
 		CommandStruct {
 			name: "help",
@@ -45,37 +45,45 @@ pub fn get_commands() -> [CommandStruct<'static>; 8] {
 			usage: "test <args>",
 		},
 		CommandStruct {
-			name: "rec",
+			name: "load_config",
 			alias: None,
-			func: rec_func,
-			help: Some("Receive raw"),
-			help_long: Some("Receives raw from a port"),
-			usage: "rec <port>",
+			func: load_config,
+			help: None,
+			help_long: None,
+			usage: "load_config",
 		},
-		CommandStruct {
-			name: "tra",
-			alias: None,
-			func: tra_func,
-			help: Some("Transmit text"),
-			help_long: Some("Transmits text using an address:port pair"),
-			usage: "tra <addr> <data>",
-		},
-		CommandStruct {
-			name: "rec_file",
-			alias: None,
-			func: rec_file_func,
-			help: Some("Receive files"),
-			help_long: Some("Receives files from a port"),
-			usage: "rec_file <port>",
-		},
-		CommandStruct {
-			name: "tra_file",
-			alias: None,
-			func: tra_file_func,
-			help: Some("Transmit file"),
-			help_long: Some("Transmits files using an address:port pair"),
-			usage: "tra_file <addr> <filepath>",
-		},
+		// CommandStruct {
+		// 	name: "rec",
+		// 	alias: None,
+		// 	func: rec_func,
+		// 	help: Some("Receive raw"),
+		// 	help_long: Some("Receives raw from a port"),
+		// 	usage: "rec <port>",
+		// },
+		// CommandStruct {
+		// 	name: "tra",
+		// 	alias: None,
+		// 	func: tra_func,
+		// 	help: Some("Transmit text"),
+		// 	help_long: Some("Transmits text using an address:port pair"),
+		// 	usage: "tra <addr> <data>",
+		// },
+		// CommandStruct {
+		// 	name: "rec_file",
+		// 	alias: None,
+		// 	func: rec_file_func,
+		// 	help: Some("Receive files"),
+		// 	help_long: Some("Receives files from a port"),
+		// 	usage: "rec_file <port>",
+		// },
+		// CommandStruct {
+		// 	name: "tra_file",
+		// 	alias: None,
+		// 	func: tra_file_func,
+		// 	help: Some("Transmit file"),
+		// 	help_long: Some("Transmits files using an address:port pair"),
+		// 	usage: "tra_file <addr> <filepath>",
+		// },
 	]
 }
 
@@ -90,20 +98,9 @@ pub fn get_command(name: &str) -> Result<CommandStruct, &str> {
 
 // COMMAND FUNCTIONS
 
-fn rec_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
-	network::receive_data_func(args.unwrap())
-}
-
-fn tra_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
-	network::send_data_func(args.unwrap())
-}
-
-fn rec_file_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
-	network::receive_file_func(args.unwrap())
-}
-
-fn tra_file_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
-	network::send_file_func(args.unwrap())
+pub fn load_config(args: Option<Vec<String>>) -> Result<Option<String>, String> {
+	crate::config::load_config(None);
+	Ok(None)
 }
 
 fn test_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
@@ -123,9 +120,7 @@ fn clear_screen_func(_args: Option<Vec<String>>) -> Result<Option<String>, Strin
 	#[cfg(feature = "windows-os")]
 	// print!("\x1B[2J\x1B[1;1H");
 	// print!("{}[2J", 27 as char);
-	println!(
-		"Unimplemented feature because of how wack windows is."
-	);
+	println!("Unimplemented feature because of how wack windows is.");
 
 	#[cfg(feature = "linux-os")]
 	print!("{esc}c", esc = 27 as char);
@@ -168,4 +163,20 @@ fn help_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
 	}
 
 	Ok(None)
+}
+
+fn rec_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
+	network::receive_data_func(args.unwrap())
+}
+
+fn tra_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
+	network::send_data_func(args.unwrap())
+}
+
+fn rec_file_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
+	network::receive_file_func(args.unwrap())
+}
+
+fn tra_file_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
+	network::send_file_func(args.unwrap())
 }

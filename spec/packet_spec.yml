@@ -1,0 +1,25 @@
+# u00      u0000  u00                 u00   b00...
+# version  size   multi packet count  type  packet body
+
+version: packet version, allows backward compatibility later down the line, or at the very least basic communication to let either the server or client know its potentially outdated and needs to terminate the connection in case the changes will result in improper data transport
+
+size: size of packet body
+
+multi packet count: how many *extra* packets to read after this one
+
+type:
+  common:
+    36: multi packet
+  client:
+    19: auth request
+  server:
+    29: response, 0 success, any other value fail (F for custom error response in ascii?)
+    32: session token
+
+
+constant behavior:
+  
+  server relay status every 5 secs while waiting in queue
+  once spot available, update client immediately and init connection
+  
+  client if relay misses target say disconnect and relay to server queue disconnect status
