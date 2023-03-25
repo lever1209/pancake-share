@@ -11,7 +11,7 @@ license = "BSD 3-Clause \"New\" or \"Revised\" License"
 edition = "2021"
 
 [dependencies]
-clap = { version = "4.0.32" }
+clap = { version = "4.0.32", features = ["cargo"] }
 # librsync = "0.2.1"
 borsh = "0.9.3"
 # home = "0.5.4"

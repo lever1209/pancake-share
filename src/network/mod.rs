@@ -1,51 +1,57 @@
 use core::result::Result;
 
-type Ret = Result<Option<String>, String>;
+pub mod server {
+	pub fn init() {
+		
+	}
+}
 
-pub fn send_data_func(args: Vec<String>) -> Result<Option<String>, String> {
-	// let mut stream = TcpStream::connect(&args[0]).unwrap();
+// type Ret = Result<Option<String>, String>;
+
+// pub fn send_data_func(args: Vec<String>) -> Result<Option<String>, String> {
+// 	// let mut stream = TcpStream::connect(&args[0]).unwrap();
 	
-	// for arg in args {
-	// 	match stream.write(arg.as_bytes()) {
-	// 		Ok(_) => (),
-	// 		Err(_) => return Err("Could not write raw string to outgoing tcp stream.".to_string()),
-	// 	};
-	// }
+// 	// for arg in args {
+// 	// 	match stream.write(arg.as_bytes()) {
+// 	// 		Ok(_) => (),
+// 	// 		Err(_) => return Err("Could not write raw string to outgoing tcp stream.".to_string()),
+// 	// 	};
+// 	// }
 
-	// stream.shutdown(std::net::Shutdown::Both).ok();
+// 	// stream.shutdown(std::net::Shutdown::Both).ok();
 
-	Ok(Some("Networking disabled for now.".to_string()))
-}
+// 	Ok(Some("Networking disabled for now.".to_string()))
+// }
 
-pub fn receive_data_func(args: Vec<String>) -> Result<Option<String>, String> {
-	// let loopback = Ipv4Addr::new(0, 0, 0, 0);
-	// let socket = SocketAddrV4::new(loopback, args[0].parse::<u16>().unwrap());
-	// let listener = TcpListener::bind(socket).unwrap();
-	// println!("Listening on [{}].", listener.local_addr().unwrap());
-	// let (mut tcp_stream, addr) = listener.accept().unwrap();
-	// println!("Connection received! {addr:?} is sending data.");
-	// let mut input = String::new();
-	// let _ = tcp_stream.read_to_string(&mut input);
-	// println!("{:?} \"{}\"", addr, input.trim());
+// pub fn receive_data_func(args: Vec<String>) -> Result<Option<String>, String> {
+// 	// let loopback = Ipv4Addr::new(0, 0, 0, 0);
+// 	// let socket = SocketAddrV4::new(loopback, args[0].parse::<u16>().unwrap());
+// 	// let listener = TcpListener::bind(socket).unwrap();
+// 	// println!("Listening on [{}].", listener.local_addr().unwrap());
+// 	// let (mut tcp_stream, addr) = listener.accept().unwrap();
+// 	// println!("Connection received! {addr:?} is sending data.");
+// 	// let mut input = String::new();
+// 	// let _ = tcp_stream.read_to_string(&mut input);
+// 	// println!("{:?} \"{}\"", addr, input.trim());
 	
-	Ok(Some("Networking disabled for now.".to_string()))
-}
+// 	Ok(Some("Networking disabled for now.".to_string()))
+// }
 
-pub fn send_file_func(args: Vec<String>) -> Result<Option<String>, String> {
-	// match net_io::send_message() {
-	// 	Ok(_) => Ok(None),
-	// 	Err(e) => Err(e),
-	// }
-	Ok(Some("Networking disabled for now.".to_string()))
-}
+// pub fn send_file_func(args: Vec<String>) -> Result<Option<String>, String> {
+// 	// match net_io::send_message() {
+// 	// 	Ok(_) => Ok(None),
+// 	// 	Err(e) => Err(e),
+// 	// }
+// 	Ok(Some("Networking disabled for now.".to_string()))
+// }
 
-pub fn receive_file_func(args: Vec<String>) -> Ret {
-	// match net_io::init_server() {
-	// 	Ok(_) => Ok(None),
-	// 	Err(e) => Err(e),
-	// }
-	Ok(Some("Networking disabled for now.".to_string()))
-}
+// pub fn receive_file_func(args: Vec<String>) -> Ret {
+// 	// match net_io::init_server() {
+// 	// 	Ok(_) => Ok(None),
+// 	// 	Err(e) => Err(e),
+// 	// }
+// 	Ok(Some("Networking disabled for now.".to_string()))
+// }
 
 // mod net_io {
 
