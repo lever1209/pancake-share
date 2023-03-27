@@ -1,5 +1,5 @@
-# u00      u0000  u00                 u00   b00...
-# version  size   multi packet count  type  packet body
+def:    u00      u0000  u00                 u00   b+
+legend: version  size   multi packet count  type  packet body
 
 version: packet version, allows backward compatibility later down the line, or at the very least basic communication to let either the server or client know its potentially outdated and needs to terminate the connection in case the changes will result in improper data transport
 
@@ -8,12 +8,12 @@ size: size of packet body
 multi packet count: how many *extra* packets to read after this one
 
 type:
-  common:
+  # common:
     36: multi packet
-  client:
+  # client:
     19: auth request
-  server:
-    29: response, 0 success, any other value fail (F for custom error response in ascii?)
+  # server:
+    29: response, 0 success, any other value fail (size > 1 for custom error response in ascii?)
     32: session token
 
 

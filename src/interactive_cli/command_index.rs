@@ -165,18 +165,18 @@ fn help_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
 	Ok(None)
 }
 
-fn rec_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
-	network::receive_data_func(args.unwrap())
-}
+// fn rec_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
+// 	network::receive_data_func(args.unwrap())
+// }
 
-fn tra_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
-	network::send_data_func(args.unwrap())
-}
+// fn tra_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
+// 	network::send_data_func(args.unwrap())
+// }
 
-fn rec_file_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
-	network::receive_file_func(args.unwrap())
-}
+// fn rec_file_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
+// 	network::receive_file_func(args.unwrap())
+// }
 
-fn tra_file_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
-	network::send_file_func(args.unwrap())
-}
+// fn tra_file_func(args: Option<Vec<String>>) -> Result<Option<String>, String> {
+// 	network::send_file_func(args.unwrap())
+// }
